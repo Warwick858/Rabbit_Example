@@ -26,13 +26,16 @@
 //
 // ******************************************************************************************************************
 //
-using RabbitMQ.Client;
-using Subscribe.Config;
+using System.Collections.Generic;
 
-namespace Subscribe.Interfaces
+namespace Common.Config
 {
-	public interface IRabbitChannelCreator
+	public class RabbitConfig
 	{
-		IModel CreateChannel(QueueConfig queueConfig);
+		public static int DispatcherCount { get; set; }
+		public static string Password { get; set; }
+		public static List<QueueConfig> Queues { get; set; }
+		public static string Server { get; set; }
+		public static string UserName { get; set; }
 	}
 }

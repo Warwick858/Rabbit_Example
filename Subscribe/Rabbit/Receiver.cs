@@ -26,16 +26,35 @@
 //
 // ******************************************************************************************************************
 //
-using System.Collections.Generic;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
-namespace Subscribe.Config
+namespace Subscribe.Rabbit
 {
-	public class RabbitConfig
+	public class Receiver<T>
 	{
-		public static int DispatcherCount { get; set; }
-		public static string Password { get; set; }
-		public static List<QueueConfig> Queues { get; set; }
-		public static string Server { get; set; }
-		public static string UserName { get; set; }
+		private BasicDeliverEventArgs Envelope { get; set; }
+		private IModel ReceivingChannel { get; set; }
+
+		public bool IsMessageRejected { get; set; }
+		public T Message { get; set; }
+		public string RejectReason { get; set; }
+
+		public Receiver(T message, BasicDeliverEventArgs envelope, IModel channel)
+		{
+			Message = message;
+			Envelope = envelope;
+			ReceivingChannel = channel;
+		}
+
+		public void Ack()
+		{
+			ReceivingChannel.BasicAck(Envelope.DeliveryTag, false);
+		}
+
+		public void Reject()
+		{
+			ReceivingChannel.BasicReject(Envelope.DeliveryTag, false);
+		}
 	}
 }

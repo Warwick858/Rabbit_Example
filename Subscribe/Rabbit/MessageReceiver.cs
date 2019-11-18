@@ -26,54 +26,72 @@
 //
 // ******************************************************************************************************************
 //
+using Common.Model;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using RabbitMQ.Client;
-using Subscribe.Config;
-using Subscribe.Interfaces;
+using RabbitMQ.Client.Events;
 using System;
-using System.Collections.Generic;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 
 namespace Subscribe.Rabbit
 {
-	public class RabbitChannelCreator : IRabbitChannelCreator
+	public class MessageReceiver : IObservable<Receiver<BunnyModel>>
 	{
-		private readonly IConnection _connection;
+		private readonly IModel _channel;
+		private readonly JsonSerializerSettings _jsonSettings;
+		private readonly string _queue;
 
-		public RabbitChannelCreator(IConnection connection)
+		public MessageReceiver(IModel channel, string queue)
 		{
-			_connection = connection;
+			_channel = channel;
+			_queue = queue;
+			_jsonSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
 		}
 
-		public virtual IModel CreateChannel(QueueConfig queueConfig)
+		public IDisposable Subscribe(IObserver<Receiver<BunnyModel>> observer)
 		{
-			var queueArgs = new Dictionary<string, object> { { "queue-mode", "lazy" } };
+			var consumer = new EventingBasicConsumer(_channel);
+			var observableDisposable = Observable.FromEventPattern<BasicDeliverEventArgs>(consumer, "Received")
+				.Select(CreateIncomingMessage).Subscribe(observer);
+			_channel.BasicConsume(_queue, false, consumer);
 
-			var newChannel = _connection.CreateModel();
-
-			try
+			return Disposable.Create(() =>
 			{
-				newChannel.ExchangeDeclare(queueConfig.ExchangeName, queueConfig.ExchangeType, true);
-				newChannel.QueueDeclare(queueConfig.QueueName, true, false, false, queueArgs);
+				observableDisposable.Dispose();
+				if (!_channel.IsOpen)
+					return;
 
-				if (queueConfig.ExchangeType == ExchangeType.Headers)
+				_channel.Close();
+			});
+		}
+
+		private Receiver<BunnyModel> CreateIncomingMessage(EventPattern<BasicDeliverEventArgs> receivedEvent)
+		{
+			Receiver<BunnyModel> newMsg = null;
+			var envelope = receivedEvent.EventArgs;
+
+			if (envelope != null)
+			{
+				try
 				{
-					var headerOptions = new Dictionary<string, object>();
-					foreach (var (key, value) in queueConfig.Headers)
-						headerOptions.Add(key, value);
-
-					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey, headerOptions);
+					newMsg = new Receiver<BunnyModel>(
+						JsonConvert.DeserializeObject<BunnyModel>(Encoding.UTF8.GetString(envelope.Body), _jsonSettings), envelope, _channel);
 				}
-				else
-					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey);
-
-				newChannel.BasicQos(0, 32, false);
+				catch
+				{
+					_channel.BasicNack(envelope.DeliveryTag, false, false);
+				}
 			}
-			catch
+			else
 			{
-				throw;
+				_channel.BasicNack(envelope.DeliveryTag, false, false);
 			}
 
-			return newChannel;
+			return newMsg;
 		}
 	}
 }

@@ -26,29 +26,28 @@
 //
 // ******************************************************************************************************************
 //
+using Common.Config;
 using Common.Interfaces;
 using Common.Model;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using Subscribe.Config;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
 
 namespace Subscribe.Rabbit
 {
 	public class MessageDispatcher : IDisposable
 	{
-		private readonly RabbitChannelCreator _channelCreator;
+		private readonly ChannelCreator _channelCreator;
 		private readonly IServiceProvider _services;
 		private readonly CompositeDisposable _msgSubscriptions;
 		private readonly List<IModel> _channels = new List<IModel>();
 		private readonly List<QueueConfig> _queues;
 
-		public MessageDispatcher(RabbitChannelCreator channelCreator, IServiceProvider services)
+		public MessageDispatcher(ChannelCreator channelCreator, IServiceProvider services)
 		{
 			_channelCreator = channelCreator;
 			_services = services;
@@ -66,7 +65,7 @@ namespace Subscribe.Rabbit
 		public void StartDispatcher(QueueConfig queueConfig)
 		{
 			var channel = _channelCreator.CreateChannel(queueConfig);
-			var incomingMsg = new IncomingMessageSource(channel, queueConfig.QueueName);
+			var incomingMsg = new MessageReceiver(channel, queueConfig.QueueName);
 			var subscription = incomingMsg.SubscribeOn(NewThreadScheduler.Default).Retry().Subscribe(DispatchMessage, OnError);
 			_msgSubscriptions.Add(subscription);
 		}
@@ -93,7 +92,7 @@ namespace Subscribe.Rabbit
 			//Log error
 		}
 
-		public void DispatchMessage(IncomingMessage<BunnyModel> msg)
+		public void DispatchMessage(Receiver<BunnyModel> msg)
 		{
 			if (msg != null)
 			{
@@ -116,7 +115,7 @@ namespace Subscribe.Rabbit
 
 		public void Dispose()
 		{
-			throw new NotImplementedException();
+			_msgSubscriptions?.Dispose();
 		}
 	}
 }

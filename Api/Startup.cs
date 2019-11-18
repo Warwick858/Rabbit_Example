@@ -84,7 +84,7 @@ namespace Api
 
 			var rabbitConnection = connectionFactory.CreateConnection();
 			services.AddSingleton(rabbitConnection);
-			services.AddSingleton<RabbitChannelCreator>();
+			services.AddSingleton<ChannelCreator>();
 			services.AddSingleton<MessageDispatcher>();
 
 			if (Debugger.IsAttached)

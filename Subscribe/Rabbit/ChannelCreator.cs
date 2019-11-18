@@ -26,35 +26,52 @@
 //
 // ******************************************************************************************************************
 //
+using Common.Config;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
+using Subscribe.Interfaces;
+using System.Collections.Generic;
 
 namespace Subscribe.Rabbit
 {
-	public class IncomingMessage<T>
+	public class ChannelCreator : IChannelCreator
 	{
-		private BasicDeliverEventArgs Envelope { get; set; }
-		private IModel ReceivingChannel { get; set; }
+		private readonly IConnection _connection;
 
-		public bool IsMessageRejected { get; set; }
-		public T Message { get; set; }
-		public string RejectReason { get; set; }
-
-		public IncomingMessage(T message, BasicDeliverEventArgs envelope, IModel channel)
+		public ChannelCreator(IConnection connection)
 		{
-			Message = message;
-			Envelope = envelope;
-			ReceivingChannel = channel;
+			_connection = connection;
 		}
 
-		public void Ack()
+		public virtual IModel CreateChannel(QueueConfig queueConfig)
 		{
-			ReceivingChannel.BasicAck(Envelope.DeliveryTag, false);
-		}
+			var queueArgs = new Dictionary<string, object> { { "queue-mode", "lazy" } };
 
-		public void Reject()
-		{
-			ReceivingChannel.BasicReject(Envelope.DeliveryTag, false);
+			var newChannel = _connection.CreateModel();
+
+			try
+			{
+				newChannel.ExchangeDeclare(queueConfig.ExchangeName, queueConfig.ExchangeType, true);
+				newChannel.QueueDeclare(queueConfig.QueueName, true, false, false, queueArgs);
+
+				if (queueConfig.ExchangeType == ExchangeType.Headers)
+				{
+					var headerOptions = new Dictionary<string, object>();
+					foreach (var (key, value) in queueConfig.Headers)
+						headerOptions.Add(key, value);
+
+					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey, headerOptions);
+				}
+				else
+					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey);
+
+				newChannel.BasicQos(0, 32, false);
+			}
+			catch
+			{
+				throw;
+			}
+
+			return newChannel;
 		}
 	}
 }

@@ -28,7 +28,7 @@
 //
 using System.Collections.Generic;
 
-namespace Subscribe.Config
+namespace Common.Config
 {
 	public class QueueConfig
 	{
