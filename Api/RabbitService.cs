@@ -26,45 +26,43 @@
 //
 // ******************************************************************************************************************
 //
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.ServiceProcess;
+using Microsoft.AspNetCore.Hosting.WindowsServices;
+using Microsoft.Extensions.DependencyInjection;
+using Subscribe.Config;
+using Subscribe.Rabbit;
 
 namespace Api
 {
-	public class Program
+	public class RabbitService : WebHostService
 	{
-		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
-			.ConfigureAppConfiguration((context, config) => 
-			{
+		private readonly MessageDispatcher _dispatcher;
 
-			})
-			.UseStartup<Startup>();
-
-		public static void Main(string[] args)
+		public RabbitService(IWebHost host) : base(host)
 		{
-			var isWebService = !(Debugger.IsAttached || args.Contains("--console"));
+			_dispatcher = host.Services.GetRequiredService<MessageDispatcher>();
+		}
 
-			if (isWebService)
-			{
-				var executablePath = Process.GetCurrentProcess().MainModule.FileName;
-				var parentDirectoryPath = Path.GetDirectoryName(executablePath);
-				Directory.SetCurrentDirectory(parentDirectoryPath);
-			}
+		protected override void OnStarting(string[] args)
+		{
+			_dispatcher.StartDispatchers(RabbitConfig.DispatcherCount);
+			base.OnStarting(args);
+		}
 
-			var builder = CreateWebHostBuilder(args.Where(a => a != "--console").ToArray());
+		protected override void OnStarted()
+		{
+			_dispatcher.StopDispatchers();
+			base.OnStarted();
+		}
 
-			var host = builder.Build();
+		protected override void OnStopping()
+		{
+			base.OnStopping();
+		}
 
-			if (isWebService)
-				ServiceBase.Run(new RabbitService(host));
-			else
-				host.Run();
+		protected override void OnStopped()
+		{
+			base.OnStopped();
 		}
 	}
 }

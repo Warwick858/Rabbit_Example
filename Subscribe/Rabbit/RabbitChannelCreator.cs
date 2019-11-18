@@ -26,45 +26,54 @@
 //
 // ******************************************************************************************************************
 //
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+using RabbitMQ.Client;
+using Subscribe.Config;
+using Subscribe.Interfaces;
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.ServiceProcess;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Api
+namespace Subscribe.Rabbit
 {
-	public class Program
+	public class RabbitChannelCreator : IRabbitChannelCreator
 	{
-		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
-			.ConfigureAppConfiguration((context, config) => 
-			{
+		private readonly IConnection _connection;
 
-			})
-			.UseStartup<Startup>();
-
-		public static void Main(string[] args)
+		public RabbitChannelCreator(IConnection connection)
 		{
-			var isWebService = !(Debugger.IsAttached || args.Contains("--console"));
+			_connection = connection;
+		}
 
-			if (isWebService)
+		public virtual IModel CreateChannel(QueueConfig queueConfig)
+		{
+			var queueArgs = new Dictionary<string, object> { { "queue-mode", "lazy" } };
+
+			var newChannel = _connection.CreateModel();
+
+			try
 			{
-				var executablePath = Process.GetCurrentProcess().MainModule.FileName;
-				var parentDirectoryPath = Path.GetDirectoryName(executablePath);
-				Directory.SetCurrentDirectory(parentDirectoryPath);
+				newChannel.ExchangeDeclare(queueConfig.ExchangeName, queueConfig.ExchangeType, true);
+				newChannel.QueueDeclare(queueConfig.QueueName, true, false, false, queueArgs);
+
+				if (queueConfig.ExchangeType == ExchangeType.Headers)
+				{
+					var headerOptions = new Dictionary<string, object>();
+					foreach (var (key, value) in queueConfig.Headers)
+						headerOptions.Add(key, value);
+
+					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey, headerOptions);
+				}
+				else
+					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey);
+
+				newChannel.BasicQos(0, 32, false);
+			}
+			catch
+			{
+				throw;
 			}
 
-			var builder = CreateWebHostBuilder(args.Where(a => a != "--console").ToArray());
-
-			var host = builder.Build();
-
-			if (isWebService)
-				ServiceBase.Run(new RabbitService(host));
-			else
-				host.Run();
+			return newChannel;
 		}
 	}
 }

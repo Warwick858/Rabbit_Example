@@ -26,45 +26,35 @@
 //
 // ******************************************************************************************************************
 //
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.ServiceProcess;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
-namespace Api
+namespace Subscribe.Rabbit
 {
-	public class Program
+	public class IncomingMessage<T>
 	{
-		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
-			.ConfigureAppConfiguration((context, config) => 
-			{
+		private BasicDeliverEventArgs Envelope { get; set; }
+		private IModel ReceivingChannel { get; set; }
 
-			})
-			.UseStartup<Startup>();
+		public bool IsMessageRejected { get; set; }
+		public T Message { get; set; }
+		public string RejectReason { get; set; }
 
-		public static void Main(string[] args)
+		public IncomingMessage(T message, BasicDeliverEventArgs envelope, IModel channel)
 		{
-			var isWebService = !(Debugger.IsAttached || args.Contains("--console"));
+			Message = message;
+			Envelope = envelope;
+			ReceivingChannel = channel;
+		}
 
-			if (isWebService)
-			{
-				var executablePath = Process.GetCurrentProcess().MainModule.FileName;
-				var parentDirectoryPath = Path.GetDirectoryName(executablePath);
-				Directory.SetCurrentDirectory(parentDirectoryPath);
-			}
+		public void Ack()
+		{
+			ReceivingChannel.BasicAck(Envelope.DeliveryTag, false);
+		}
 
-			var builder = CreateWebHostBuilder(args.Where(a => a != "--console").ToArray());
-
-			var host = builder.Build();
-
-			if (isWebService)
-				ServiceBase.Run(new RabbitService(host));
-			else
-				host.Run();
+		public void Reject()
+		{
+			ReceivingChannel.BasicReject(Envelope.DeliveryTag, false);
 		}
 	}
 }

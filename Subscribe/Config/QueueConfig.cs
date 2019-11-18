@@ -26,45 +26,16 @@
 //
 // ******************************************************************************************************************
 //
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.ServiceProcess;
+using System.Collections.Generic;
 
-namespace Api
+namespace Subscribe.Config
 {
-	public class Program
+	public class QueueConfig
 	{
-		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
-			.ConfigureAppConfiguration((context, config) => 
-			{
-
-			})
-			.UseStartup<Startup>();
-
-		public static void Main(string[] args)
-		{
-			var isWebService = !(Debugger.IsAttached || args.Contains("--console"));
-
-			if (isWebService)
-			{
-				var executablePath = Process.GetCurrentProcess().MainModule.FileName;
-				var parentDirectoryPath = Path.GetDirectoryName(executablePath);
-				Directory.SetCurrentDirectory(parentDirectoryPath);
-			}
-
-			var builder = CreateWebHostBuilder(args.Where(a => a != "--console").ToArray());
-
-			var host = builder.Build();
-
-			if (isWebService)
-				ServiceBase.Run(new RabbitService(host));
-			else
-				host.Run();
-		}
+		public string ExchangeName { get; set; }
+		public string ExchangeType { get; set; }
+		public string QueueName { get; set; }
+		public string RoutingKey { get; set; }
+		public Dictionary<string, string> Headers { get; set; }
 	}
 }

@@ -26,45 +26,16 @@
 //
 // ******************************************************************************************************************
 //
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.ServiceProcess;
+using Common.Interfaces;
+using Common.Model;
 
-namespace Api
+namespace Common
 {
-	public class Program
+	public class MessageProcessor : IMessageProcessor
 	{
-		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
-			.ConfigureAppConfiguration((context, config) => 
-			{
-
-			})
-			.UseStartup<Startup>();
-
-		public static void Main(string[] args)
+		public void ProcessMessage(BunnyModel msg)
 		{
-			var isWebService = !(Debugger.IsAttached || args.Contains("--console"));
-
-			if (isWebService)
-			{
-				var executablePath = Process.GetCurrentProcess().MainModule.FileName;
-				var parentDirectoryPath = Path.GetDirectoryName(executablePath);
-				Directory.SetCurrentDirectory(parentDirectoryPath);
-			}
-
-			var builder = CreateWebHostBuilder(args.Where(a => a != "--console").ToArray());
-
-			var host = builder.Build();
-
-			if (isWebService)
-				ServiceBase.Run(new RabbitService(host));
-			else
-				host.Run();
+			//do something with msg
 		}
 	}
 }
