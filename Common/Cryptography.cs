@@ -35,5 +35,5 @@ namespace Common
 	public class Cryptography
 	{
 
-	}
-}
+	} // end class
+} // end namespace

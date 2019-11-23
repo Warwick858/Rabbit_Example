@@ -38,5 +38,5 @@ namespace Common.Config
 		public Dictionary<string, string> Headers { get; set; }
 		public string QueueName { get; set; }
 		public string RoutingKey { get; set; }
-	}
-}
+	} // end class
+} // end namespace

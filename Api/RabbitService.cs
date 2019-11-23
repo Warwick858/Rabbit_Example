@@ -64,5 +64,5 @@ namespace Api
 		{
 			base.OnStopped();
 		}
-	}
-}
+	} // end class
+} // end namespace

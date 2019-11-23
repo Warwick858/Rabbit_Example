@@ -48,46 +48,52 @@ namespace Api
 	{
 		private AppSettings _appSettings;
 
-		private IConfigurationRoot Config { get; }
+		private IConfiguration Config { get; }
 		private MessageDispatcher _dispatcher;
 
-		public Startup(IHostingEnvironment env)
+		public Startup(IConfiguration configuration)
 		{
-			var builder = new ConfigurationBuilder()
-				.SetBasePath(env.ContentRootPath)
-				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-				.AddEnvironmentVariables();
-			Config = builder.Build();
+			Config = configuration;
 		}
+
+		//public Startup(IHostingEnvironment env)
+		//{
+		//	var builder = new ConfigurationBuilder()
+		//		.SetBasePath(env.ContentRootPath)
+		//		.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+		//		.AddEnvironmentVariables();
+		//	Config = builder.Build();
+		//}
 
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+			//services.AddHttpContextAccessor();
 
 			_appSettings = Config.GetSection("AppSettings").Get<AppSettings>();
 			services.AddSingleton(a => _appSettings);
 
 			var rabbitConfig = new RabbitConfig();
 			Config.GetSection("RabbitSettings").Bind(rabbitConfig);
-			RabbitConfig.UserName = DecryptCypherText(RabbitConfig.UserName);
-			RabbitConfig.Password = DecryptCypherText(RabbitConfig.Password);
+			RabbitConfig.UserName = DecryptCypherText(RabbitConfig.UserName); // always decrypt credentials at runtime
+			RabbitConfig.Password = DecryptCypherText(RabbitConfig.Password); // always decrypt credentials at runtime
 
-			var httpClient = new HttpClient();
-			httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-			services.AddSingleton(h => httpClient);
+			//var httpClient = new HttpClient();
+			//httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+			//services.AddSingleton(h => httpClient);
 
-			var connectionFactory = new ConnectionFactory
-			{
-				AutomaticRecoveryEnabled = true,
-				NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
-				TopologyRecoveryEnabled = true,
-				UserName = RabbitConfig.UserName,
-				Password = RabbitConfig.Password,
-				HostName = RabbitConfig.Server
-			};
+			//var connectionFactory = new ConnectionFactory
+			//{
+			//	AutomaticRecoveryEnabled = true,
+			//	NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
+			//	TopologyRecoveryEnabled = true,
+			//	UserName = RabbitConfig.UserName,
+			//	Password = RabbitConfig.Password,
+			//	HostName = RabbitConfig.Server
+			//};
 
-			var rabbitConnection = ConnectionProvider.CreateConnection();
-			services.AddSingleton(rabbitConnection);
+			//var rabbitConnection = ConnectionProvider.CreateConnection();
+			//services.AddSingleton(rabbitConnection);
 			services.AddSingleton<ChannelProvider>();
 			services.AddSingleton<MessageDispatcher>();
 			services.AddSingleton<MessageSender>();
@@ -98,11 +104,11 @@ namespace Api
 
 			if (Debugger.IsAttached)
 			{
-				var provider = services.BuildServiceProvider();
-				_dispatcher = provider.GetService<MessageDispatcher>();
+				var temp = services.BuildServiceProvider();
+				_dispatcher = temp.GetService<MessageDispatcher>();
 				_dispatcher.StartDispatchers(RabbitConfig.DispatcherCount);
 			}
-		}
+		} // end ConfigureServices
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime lifeTime)
 		{
@@ -117,7 +123,7 @@ namespace Api
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
 			app.UseCookiePolicy();
-		}
+		} // end Configure
 
 		private string DecryptCypherText(string cypherText)
 		{
@@ -130,5 +136,5 @@ namespace Api
 		{
 			_dispatcher.StopDispatchers();
 		}
-	}
-}
+	} // end class
+} // end namespace

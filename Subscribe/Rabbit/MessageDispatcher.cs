@@ -117,5 +117,5 @@ namespace Subscribe.Rabbit
 		{
 			_msgSubscriptions?.Dispose();
 		}
-	}
-}
+	} // end class
+} // end namespace

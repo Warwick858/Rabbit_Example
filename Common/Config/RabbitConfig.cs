@@ -37,5 +37,5 @@ namespace Common.Config
 		public static List<QueueConfig> Queues { get; set; }
 		public static string Server { get; set; }
 		public static string UserName { get; set; }
-	}
-}
+	} // end class
+} // end namespace

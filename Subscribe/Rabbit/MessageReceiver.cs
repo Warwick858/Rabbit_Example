@@ -93,5 +93,5 @@ namespace Subscribe.Rabbit
 
 			return newMsg;
 		}
-	}
-}
+	} // end class
+} // end namespace

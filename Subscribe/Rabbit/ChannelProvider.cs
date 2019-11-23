@@ -59,6 +59,7 @@ namespace Subscribe.Rabbit
 				newChannel.ExchangeDeclare(queueConfig.ExchangeName, queueConfig.ExchangeType, true);
 				newChannel.QueueDeclare(queueConfig.QueueName, true, false, false, queueArgs);
 
+				//If header exchange
 				if (queueConfig.ExchangeType == ExchangeType.Headers)
 				{
 					var headerOptions = new Dictionary<string, object>();
@@ -96,5 +97,5 @@ namespace Subscribe.Rabbit
 				_disposed = true;
 			}
 		}
-	}
-}
+	} // end class
+} // end namespace

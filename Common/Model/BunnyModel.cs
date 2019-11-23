@@ -33,5 +33,5 @@ namespace Common.Model
 		public string Id { get; set; }
 		public string Message { get; set; }
 		public string Status { get; set; }
-	}
-}
+	} // end class
+} // end namespace

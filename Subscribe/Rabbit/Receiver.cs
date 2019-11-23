@@ -56,5 +56,5 @@ namespace Subscribe.Rabbit
 		{
 			ReceivingChannel.BasicReject(Envelope.DeliveryTag, false);
 		}
-	}
-}
+	} // end class
+} // end namespace

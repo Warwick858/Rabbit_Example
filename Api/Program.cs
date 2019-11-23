@@ -66,5 +66,5 @@ namespace Api
 			else
 				host.Run();
 		}
-	}
-}
+	} // end class
+} // end namespace

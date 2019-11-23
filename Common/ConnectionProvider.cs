@@ -46,5 +46,5 @@ namespace Common
 				HostName = RabbitConfig.Server
 			}.CreateConnection();
 		}
-	}
-}
+	} // end class
+} // end namespace
