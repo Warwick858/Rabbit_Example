@@ -26,52 +26,14 @@
 //
 // ******************************************************************************************************************
 //
-using Common.Config;
-using RabbitMQ.Client;
-using Subscribe.Interfaces;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace Subscribe.Rabbit
+namespace Common
 {
-	public class ChannelCreator : IChannelCreator
+	public class Cryptography
 	{
-		private readonly IConnection _connection;
 
-		public ChannelCreator(IConnection connection)
-		{
-			_connection = connection;
-		}
-
-		public virtual IModel CreateChannel(QueueConfig queueConfig)
-		{
-			var queueArgs = new Dictionary<string, object> { { "queue-mode", "lazy" } };
-
-			var newChannel = _connection.CreateModel();
-
-			try
-			{
-				newChannel.ExchangeDeclare(queueConfig.ExchangeName, queueConfig.ExchangeType, true);
-				newChannel.QueueDeclare(queueConfig.QueueName, true, false, false, queueArgs);
-
-				if (queueConfig.ExchangeType == ExchangeType.Headers)
-				{
-					var headerOptions = new Dictionary<string, object>();
-					foreach (var (key, value) in queueConfig.Headers)
-						headerOptions.Add(key, value);
-
-					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey, headerOptions);
-				}
-				else
-					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey);
-
-				newChannel.BasicQos(0, 32, false);
-			}
-			catch
-			{
-				throw;
-			}
-
-			return newChannel;
-		}
 	}
 }

@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Publish\Publish.csproj" />
     <ProjectReference Include="..\Subscribe\Subscribe.csproj" />
   </ItemGroup>
 

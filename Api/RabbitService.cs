@@ -26,10 +26,10 @@
 //
 // ******************************************************************************************************************
 //
+using Common.Config;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.WindowsServices;
 using Microsoft.Extensions.DependencyInjection;
-using Subscribe.Config;
 using Subscribe.Rabbit;
 
 namespace Api

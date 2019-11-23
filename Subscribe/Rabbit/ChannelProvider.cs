@@ -26,17 +26,75 @@
 //
 // ******************************************************************************************************************
 //
+using Common.Config;
+using RabbitMQ.Client;
+using System;
 using System.Collections.Generic;
 
-namespace Common.Config
+namespace Subscribe.Rabbit
 {
-	public class QueueConfig
+	public class ChannelProvider : IDisposable
 	{
-		public string ActiveHeaderQueue { get; set; }
-		public string ExchangeName { get; set; }
-		public string ExchangeType { get; set; }
-		public Dictionary<string, string> Headers { get; set; }
-		public string QueueName { get; set; }
-		public string RoutingKey { get; set; }
+		private readonly IConnection _connection;
+		private bool _disposed = false;
+
+		public ChannelProvider(IConnection connection)
+		{
+			_connection = connection;
+		}
+
+		~ChannelProvider()
+		{
+			Dispose(false);
+		}
+
+		public virtual IModel CreateChannel(QueueConfig queueConfig)
+		{
+			var queueArgs = new Dictionary<string, object> { { "queue-mode", "lazy" } };
+
+			var newChannel = _connection.CreateModel();
+
+			try
+			{
+				newChannel.ExchangeDeclare(queueConfig.ExchangeName, queueConfig.ExchangeType, true);
+				newChannel.QueueDeclare(queueConfig.QueueName, true, false, false, queueArgs);
+
+				if (queueConfig.ExchangeType == ExchangeType.Headers)
+				{
+					var headerOptions = new Dictionary<string, object>();
+					foreach (var (key, value) in queueConfig.Headers)
+						headerOptions.Add(key, value);
+
+					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey, headerOptions);
+				}
+				else
+					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey);
+
+				newChannel.BasicQos(0, 32, false);
+			}
+			catch
+			{
+				throw;
+			}
+
+			return newChannel;
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!_disposed)
+			{
+				if (disposing)
+					_connection.Dispose();
+
+				_disposed = true;
+			}
+		}
 	}
 }

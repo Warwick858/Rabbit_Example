@@ -41,13 +41,13 @@ namespace Subscribe.Rabbit
 {
 	public class MessageDispatcher : IDisposable
 	{
-		private readonly ChannelCreator _channelCreator;
+		private readonly ChannelProvider _channelCreator;
 		private readonly IServiceProvider _services;
 		private readonly CompositeDisposable _msgSubscriptions;
 		private readonly List<IModel> _channels = new List<IModel>();
 		private readonly List<QueueConfig> _queues;
 
-		public MessageDispatcher(ChannelCreator channelCreator, IServiceProvider services)
+		public MessageDispatcher(ChannelProvider channelCreator, IServiceProvider services)
 		{
 			_channelCreator = channelCreator;
 			_services = services;

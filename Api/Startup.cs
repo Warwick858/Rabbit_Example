@@ -26,14 +26,16 @@
 //
 // ******************************************************************************************************************
 //
+using Common;
 using Common.AppSettings;
+using Common.Config;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Publish.Rabbit;
 using RabbitMQ.Client;
-using Subscribe.Config;
 using Subscribe.Rabbit;
 using System;
 using System.Diagnostics;
@@ -67,6 +69,8 @@ namespace Api
 
 			var rabbitConfig = new RabbitConfig();
 			Config.GetSection("RabbitSettings").Bind(rabbitConfig);
+			RabbitConfig.UserName = DecryptCypherText(RabbitConfig.UserName);
+			RabbitConfig.Password = DecryptCypherText(RabbitConfig.Password);
 
 			var httpClient = new HttpClient();
 			httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -77,15 +81,20 @@ namespace Api
 				AutomaticRecoveryEnabled = true,
 				NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
 				TopologyRecoveryEnabled = true,
-				UserName = DecryptCypherText(RabbitConfig.UserName),
-				Password = DecryptCypherText(RabbitConfig.Password),
+				UserName = RabbitConfig.UserName,
+				Password = RabbitConfig.Password,
 				HostName = RabbitConfig.Server
 			};
 
-			var rabbitConnection = connectionFactory.CreateConnection();
+			var rabbitConnection = ConnectionProvider.CreateConnection();
 			services.AddSingleton(rabbitConnection);
-			services.AddSingleton<ChannelCreator>();
+			services.AddSingleton<ChannelProvider>();
 			services.AddSingleton<MessageDispatcher>();
+			services.AddSingleton<MessageSender>();
+			services.AddSingleton<SenderWrapper>();
+			services.AddSingleton<SenderProvider>();
+			services.AddSingleton<Sender>();
+			services.AddSingleton<Marshaller>();
 
 			if (Debugger.IsAttached)
 			{
@@ -95,7 +104,7 @@ namespace Api
 			}
 		}
 
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime lifeTime, IServiceProvider serviceProvider)
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime lifeTime)
 		{
 			if (env.IsDevelopment())
 				app.UseDeveloperExceptionPage();

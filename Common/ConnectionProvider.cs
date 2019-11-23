@@ -26,17 +26,25 @@
 //
 // ******************************************************************************************************************
 //
-using System.Collections.Generic;
+using Common.Config;
+using RabbitMQ.Client;
+using System;
 
-namespace Common.Config
+namespace Common
 {
-	public class QueueConfig
+	public static class ConnectionProvider
 	{
-		public string ActiveHeaderQueue { get; set; }
-		public string ExchangeName { get; set; }
-		public string ExchangeType { get; set; }
-		public Dictionary<string, string> Headers { get; set; }
-		public string QueueName { get; set; }
-		public string RoutingKey { get; set; }
+		public static IConnection CreateConnection()
+		{
+			return new ConnectionFactory
+			{
+				AutomaticRecoveryEnabled = true,
+				NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
+				TopologyRecoveryEnabled = true,
+				UserName = RabbitConfig.UserName,
+				Password = RabbitConfig.Password,
+				HostName = RabbitConfig.Server
+			}.CreateConnection();
+		}
 	}
 }
