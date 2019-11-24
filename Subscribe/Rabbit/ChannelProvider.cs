@@ -72,6 +72,8 @@ namespace Subscribe.Rabbit
 					newChannel.QueueBind(queueConfig.QueueName, queueConfig.ExchangeName, queueConfig.RoutingKey);
 
 				newChannel.BasicQos(0, 32, false);
+				newChannel.ConfirmSelect();
+				_connection.AutoClose = true;
 			}
 			catch
 			{

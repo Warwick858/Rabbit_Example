@@ -26,16 +26,15 @@
 //
 // ******************************************************************************************************************
 //
-using Common.Interfaces;
 using Common.Model;
 
 namespace Common
 {
-	public class MessageProcessor : IMessageProcessor
+	public class MessageProcessor
 	{
 		public void ProcessMessage(BunnyModel msg)
 		{
-			//do something with msg
+			//do something with the message
 		}
-	}
-}
+	} // end class
+} // end namespace

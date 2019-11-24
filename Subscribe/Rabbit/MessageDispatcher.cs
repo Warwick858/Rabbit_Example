@@ -26,8 +26,8 @@
 //
 // ******************************************************************************************************************
 //
+using Common;
 using Common.Config;
-using Common.Interfaces;
 using Common.Model;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -41,15 +41,15 @@ namespace Subscribe.Rabbit
 {
 	public class MessageDispatcher : IDisposable
 	{
-		private readonly ChannelProvider _channelCreator;
+		private readonly ChannelProvider _channelProvider;
 		private readonly IServiceProvider _services;
 		private readonly CompositeDisposable _msgSubscriptions;
 		private readonly List<IModel> _channels = new List<IModel>();
 		private readonly List<QueueConfig> _queues;
 
-		public MessageDispatcher(ChannelProvider channelCreator, IServiceProvider services)
+		public MessageDispatcher(ChannelProvider channelProvider, IServiceProvider services)
 		{
-			_channelCreator = channelCreator;
+			_channelProvider = channelProvider;
 			_services = services;
 			_msgSubscriptions = new CompositeDisposable();
 			_queues = RabbitConfig.Queues;
@@ -64,7 +64,7 @@ namespace Subscribe.Rabbit
 
 		public void StartDispatcher(QueueConfig queueConfig)
 		{
-			var channel = _channelCreator.CreateChannel(queueConfig);
+			var channel = _channelProvider.CreateChannel(queueConfig);
 			var incomingMsg = new MessageReceiver(channel, queueConfig.QueueName);
 			var subscription = incomingMsg.SubscribeOn(NewThreadScheduler.Default).Retry().Subscribe(DispatchMessage, OnError);
 			_msgSubscriptions.Add(subscription);
@@ -101,7 +101,7 @@ namespace Subscribe.Rabbit
 					var scopeFactory = _services.GetRequiredService<IServiceScopeFactory>();
 					using (var scope = scopeFactory.CreateScope())
 					{
-						var msgProcessor = scope.ServiceProvider.GetService<IMessageProcessor>();
+						var msgProcessor = scope.ServiceProvider.GetService<MessageProcessor>();
 						msgProcessor.ProcessMessage(msg.Message);
 						msg.Ack();
 					}

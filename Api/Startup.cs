@@ -34,6 +34,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Publish;
 using Publish.Rabbit;
 using RabbitMQ.Client;
 using Subscribe.Rabbit;
@@ -47,15 +48,9 @@ namespace Api
 	public class Startup
 	{
 		private AppSettings _appSettings;
-
-		private IConfiguration Config { get; }
 		private MessageDispatcher _dispatcher;
 
-		public Startup(IConfiguration configuration)
-		{
-			Config = configuration;
-		}
-
+		//private IConfigurationRoot Config { get; }
 		//public Startup(IHostingEnvironment env)
 		//{
 		//	var builder = new ConfigurationBuilder()
@@ -64,6 +59,13 @@ namespace Api
 		//		.AddEnvironmentVariables();
 		//	Config = builder.Build();
 		//}
+
+		private IConfiguration Config { get; }
+
+		public Startup(IConfiguration configuration)
+		{
+			Config = configuration;
+		}
 
 		public void ConfigureServices(IServiceCollection services)
 		{
@@ -92,15 +94,17 @@ namespace Api
 			//	HostName = RabbitConfig.Server
 			//};
 
-			//var rabbitConnection = ConnectionProvider.CreateConnection();
-			//services.AddSingleton(rabbitConnection);
-			services.AddSingleton<ChannelProvider>();
-			services.AddSingleton<MessageDispatcher>();
-			services.AddSingleton<MessageSender>();
+			var rabbitConnection = ConnectionProvider.CreateConnection();
+			services.AddSingleton(rabbitConnection);
 			services.AddSingleton<SenderWrapper>();
+			var senderProvider = new SenderProvider();
 			services.AddSingleton<SenderProvider>();
 			services.AddSingleton<Sender>();
 			services.AddSingleton<Marshaller>();
+			services.AddSingleton<ChannelProvider>();
+			services.AddSingleton<MessageDispatcher>();
+			services.AddSingleton<MessageSender>();
+
 
 			if (Debugger.IsAttached)
 			{
@@ -108,6 +112,10 @@ namespace Api
 				_dispatcher = temp.GetService<MessageDispatcher>();
 				_dispatcher.StartDispatchers(RabbitConfig.DispatcherCount);
 			}
+
+			//Emulate pub/sub eventing
+			var processor = new PublishGenerator(senderProvider);
+			processor.StartPubSubLoop();
 		} // end ConfigureServices
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime lifeTime)
