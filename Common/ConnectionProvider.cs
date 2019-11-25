@@ -32,15 +32,15 @@ using System;
 
 namespace Common
 {
-	public static class ConnectionProvider
+	public class ConnectionProvider
 	{
 		public static IConnection CreateConnection()
 		{
 			return new ConnectionFactory
 			{
-				AutomaticRecoveryEnabled = true,
-				NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
-				TopologyRecoveryEnabled = true,
+				//AutomaticRecoveryEnabled = true,
+				//NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
+				//TopologyRecoveryEnabled = true,
 				UserName = RabbitConfig.UserName,
 				Password = RabbitConfig.Password,
 				HostName = RabbitConfig.Server

@@ -43,10 +43,10 @@ namespace Subscribe.Rabbit
 			_connection = connection;
 		}
 
-		~ChannelProvider()
-		{
-			Dispose(false);
-		}
+		//~ChannelProvider()
+		//{
+		//	Dispose(false);
+		//}
 
 		public virtual IModel CreateChannel(QueueConfig queueConfig)
 		{
@@ -86,7 +86,7 @@ namespace Subscribe.Rabbit
 		public void Dispose()
 		{
 			Dispose(true);
-			GC.SuppressFinalize(this);
+			//GC.SuppressFinalize(this);
 		}
 
 		protected virtual void Dispose(bool disposing)
@@ -94,7 +94,7 @@ namespace Subscribe.Rabbit
 			if (!_disposed)
 			{
 				if (disposing)
-					_connection.Dispose();
+					//_connection.Dispose();
 
 				_disposed = true;
 			}

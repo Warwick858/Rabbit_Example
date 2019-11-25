@@ -96,22 +96,26 @@ namespace Api
 
 			var rabbitConnection = ConnectionProvider.CreateConnection();
 			services.AddSingleton(rabbitConnection);
-			services.AddSingleton<SenderWrapper>();
-			var senderProvider = new SenderProvider();
-			services.AddSingleton<SenderProvider>();
-			services.AddSingleton<Sender>();
-			services.AddSingleton<Marshaller>();
+			//Shared
 			services.AddSingleton<ChannelProvider>();
-			services.AddSingleton<MessageDispatcher>();
+			services.AddSingleton<ConnectionProvider>();
+			//Publish
+			services.AddSingleton<Marshaller>();
 			services.AddSingleton<MessageSender>();
+			services.AddSingleton<Sender>();
+			var senderProvider = new SenderProvider();
+			services.AddSingleton(senderProvider);
+			services.AddSingleton<SenderWrapper>();
+			//Subscribe
+			//services.AddSingleton<MessageDispatcher>();
+			//services.AddSingleton<MessageReceiver>();
 
-
-			if (Debugger.IsAttached)
-			{
-				var temp = services.BuildServiceProvider();
-				_dispatcher = temp.GetService<MessageDispatcher>();
-				_dispatcher.StartDispatchers(RabbitConfig.DispatcherCount);
-			}
+			//if (Debugger.IsAttached)
+			//{
+			//	var temp = services.BuildServiceProvider();
+			//	_dispatcher = temp.GetService<MessageDispatcher>();
+			//	_dispatcher.StartDispatchers(RabbitConfig.DispatcherCount);
+			//}
 
 			//Emulate pub/sub eventing
 			var processor = new PublishGenerator(senderProvider);
