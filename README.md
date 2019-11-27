@@ -31,14 +31,10 @@ Nonetheless, when you need a quick solution, RabbitMQ is a safe bet.
 
 ### Getting Started ###
 
-1. This is the rundown on how to get rabbit up and running on your local machine:
-[https://www.rabbitmq.com/install-windows.html#installer]
-(https://www.rabbitmq.com/install-windows.html#installer)
+1. This is the rundown on how to [get rabbit up and running](https://www.rabbitmq.com/install-windows.html#installer) on your local machine:
 
 2. On the page linked above, you will find that erlang is required to run rabbit with a server of "localhost".
-	a. Erlang is super light and simple to install, which can be found here:
-https://www.erlang.org/downloads
-[Erlang](https://www.erlang.org/downloads)
+	a. Erlang is super light and [simple to install](https://www.erlang.org/downloads)
 
 3. Once you've installed Erlang, go ahead and install rabbit.  The installer is in the link found in step 1.
 
@@ -52,15 +48,10 @@ Let's open the CLI tool that's included with rabbit and enable the UI tool.
 	* Run the following command on the CLI:
 	rabbitmq-plugins enable rabbitmq_management
 
-	Further details on plugin management can be found here:
-	https://www.rabbitmq.com/management.html
-	[Rabbit Plugin Mgmt](https://www.rabbitmq.com/management.html)
+	Further details on plugin management can be found [here](https://www.rabbitmq.com/management.html)
 
-	* More info on rabbit's CLI can be found here:
-	https://www.rabbitmq.com/cli.html
-	[Rabbit CLI](https://www.rabbitmq.com/cli.html)
-	https://www.rabbitmq.com/management-cli.html
-	[Rabbit CLI Mgmt](https://www.rabbitmq.com/management-cli.html)
+	* More info on rabbit's CLI can be found [here](https://www.rabbitmq.com/cli.html) 
+	and [here](https://www.rabbitmq.com/management-cli.html)
 
 5. Rabbit is ready to rock!!!  You can view the UI by putting this link in your browser:
 http://localhost:15672/#/
