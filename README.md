@@ -20,7 +20,7 @@ publish and subscribe to a dynamic message broker exchange and queueing provider
 ### Why Use RabbitMQ ###
 
 * An introduction to RabbitMQ, and how the underlying message broker technology works
-, can be found [here](https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html)
+, can be found <a href="https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html" target="_blank">here</a>
 
 * Let's be honest.  I'd rather write my own custom data structure from scratch using a uniquely defined rule set that fits the context perfectly.
 But if you tell your scrum master that you want to change your dynamic queueing story from a 5 point-story to a 55-pointer,
