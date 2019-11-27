@@ -4,6 +4,7 @@
 ### Description: RabbitMQ pub/sub example.
 
 Implementation includes pub/sub handling with header exchanges/queues.
+Handles an array of various queue types.
 Additionally, subscriber supports multithreaded message dispatchers.
 
 -----------------------------------------------------------------------------------------------
@@ -14,13 +15,18 @@ Additionally, subscriber supports multithreaded message dispatchers.
 https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html
 [Rabbit Intro](https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html)
 
+* Let's be honest.  I'd rather write my own custom data structure from scratch using a uniquely defined rule set that fits the context perfectly.
+But if you tell your scrum master that you want to change your dynamic queueing story from a 5 point-story to a 55-pointer,
+then you might hear that annoying, cliche: "Don't re-invent the wheel". Code re-use is important, but sometimes it inhibits creative advances.
+Nonetheless, when you need a quick solution, RabbitMQ is a safe bet.
+
 -----------------------------------------------------------------------------------------------
 
 ### Getting Started ###
 
 1. This is the rundown on how to get rabbit up and running on your local machine:
-https://www.rabbitmq.com/install-windows.html#installer
-[RabbitMQ](https://www.rabbitmq.com/install-windows.html#installer)
+[https://www.rabbitmq.com/install-windows.html#installer]
+(https://www.rabbitmq.com/install-windows.html#installer)
 
 2. On the page linked above, you will find that erlang is required to run rabbit with a server of "localhost".
 	a. Erlang is super light and simple to install, which can be found here:

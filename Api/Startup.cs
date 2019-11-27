@@ -31,6 +31,7 @@ using Common.AppSettings;
 using Common.Config;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -107,15 +108,15 @@ namespace Api
 			services.AddSingleton(senderProvider);
 			services.AddSingleton<SenderWrapper>();
 			//Subscribe
-			//services.AddSingleton<MessageDispatcher>();
-			//services.AddSingleton<MessageReceiver>();
+			services.AddTransient<MessageProcessor>();
+			services.AddSingleton<MessageDispatcher>();
 
-			//if (Debugger.IsAttached)
-			//{
-			//	var temp = services.BuildServiceProvider();
-			//	_dispatcher = temp.GetService<MessageDispatcher>();
-			//	_dispatcher.StartDispatchers(RabbitConfig.DispatcherCount);
-			//}
+			if (Debugger.IsAttached)
+			{
+				var temp = services.BuildServiceProvider();
+				_dispatcher = temp.GetService<MessageDispatcher>();
+				_dispatcher.StartDispatchers(RabbitConfig.DispatcherCount);
+			}
 
 			//Emulate pub/sub eventing
 			var processor = new PublishGenerator(senderProvider);
@@ -135,6 +136,11 @@ namespace Api
 			app.UseHttpsRedirection();
 			app.UseStaticFiles();
 			app.UseCookiePolicy();
+
+			app.Run(async (context) =>
+			{
+				await context.Response.WriteAsync("Running!!!");
+			});
 		} // end Configure
 
 		private string DecryptCypherText(string cypherText)

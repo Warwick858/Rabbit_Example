@@ -102,13 +102,13 @@ namespace Subscribe.Rabbit
 					using (var scope = scopeFactory.CreateScope())
 					{
 						var msgProcessor = scope.ServiceProvider.GetService<MessageProcessor>();
-						msgProcessor.ProcessMessage(msg.Message);
+						msgProcessor.ProcessMessage(msg?.Message);
 						msg.Ack();
 					}
 				}
-				catch
+				catch (Exception ex)
 				{
-					throw;
+					throw ex;
 				}
 			}
 		}
