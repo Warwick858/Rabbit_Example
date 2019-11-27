@@ -1,11 +1,17 @@
 ![JRL Logo](http://jimmyloforti.com/_common/images/jrl_logo2.png)
 
-## Application Name: Rabbit_Example
-### Description: RabbitMQ pub/sub example.
+## Application Name: Rabbit_Example ##
+## Description: RabbitMQ pub/sub example. ##
 
-Implementation includes pub/sub handling with header exchanges/queues.
-Handles an array of various queue types.
-Additionally, subscriber supports multithreaded message dispatchers.
+### Primary Features ###
+
+* RabbitMQ publishing and subscribing.
+	* UI plugin
+	* Supports an array of queues and multiple exchange/queue types.
+	* Multithreaded message dispatchers for subscribing.
+* Primary project is a core console/web hybrid.
+	* It will run as a console in release, but as a web service when debugging.
+	* Console app is required to handle multithreaded message dispatchers for subscribing.
 
 -----------------------------------------------------------------------------------------------
 

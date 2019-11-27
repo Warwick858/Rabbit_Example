@@ -139,9 +139,9 @@ namespace Api
 
 			app.Run(async (context) =>
 			{
-				await context.Response.WriteAsync("Running!!!");
+				await context.Response.WriteAsync("Rabbit_Example up and running...");
 			});
-		} // end Configure
+		}
 
 		private string DecryptCypherText(string cypherText)
 		{
