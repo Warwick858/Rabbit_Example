@@ -34,5 +34,5 @@ namespace Common.AppSettings
 		public static string ApplicationName { get; set; }
 		public static string Environment { get; set; }
 		public static string PubQueueInUse { get; set; }
-	}
-}
+	} // end class
+} // end namespace

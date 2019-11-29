@@ -37,12 +37,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Publish;
 using Publish.Rabbit;
-using RabbitMQ.Client;
 using Subscribe.Rabbit;
 using System;
 using System.Diagnostics;
-using System.Net.Http;
-using System.Net.Http.Headers;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Api
 {
@@ -50,16 +50,6 @@ namespace Api
 	{
 		private AppSettings _appSettings;
 		private MessageDispatcher _dispatcher;
-
-		//private IConfigurationRoot Config { get; }
-		//public Startup(IHostingEnvironment env)
-		//{
-		//	var builder = new ConfigurationBuilder()
-		//		.SetBasePath(env.ContentRootPath)
-		//		.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-		//		.AddEnvironmentVariables();
-		//	Config = builder.Build();
-		//}
 
 		private IConfiguration Config { get; }
 
@@ -71,7 +61,6 @@ namespace Api
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-			//services.AddHttpContextAccessor();
 
 			_appSettings = Config.GetSection("AppSettings").Get<AppSettings>();
 			services.AddSingleton(a => _appSettings);
@@ -81,25 +70,13 @@ namespace Api
 			RabbitConfig.UserName = DecryptCypherText(RabbitConfig.UserName); // always decrypt credentials at runtime
 			RabbitConfig.Password = DecryptCypherText(RabbitConfig.Password); // always decrypt credentials at runtime
 
-			//var httpClient = new HttpClient();
-			//httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-			//services.AddSingleton(h => httpClient);
-
-			//var connectionFactory = new ConnectionFactory
-			//{
-			//	AutomaticRecoveryEnabled = true,
-			//	NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
-			//	TopologyRecoveryEnabled = true,
-			//	UserName = RabbitConfig.UserName,
-			//	Password = RabbitConfig.Password,
-			//	HostName = RabbitConfig.Server
-			//};
-
 			var rabbitConnection = ConnectionProvider.CreateConnection();
 			services.AddSingleton(rabbitConnection);
+
 			//Shared
 			services.AddSingleton<ChannelProvider>();
 			services.AddSingleton<ConnectionProvider>();
+
 			//Publish
 			services.AddSingleton<Marshaller>();
 			services.AddSingleton<MessageSender>();
@@ -107,6 +84,7 @@ namespace Api
 			var senderProvider = new SenderProvider();
 			services.AddSingleton(senderProvider);
 			services.AddSingleton<SenderWrapper>();
+
 			//Subscribe
 			services.AddTransient<MessageProcessor>();
 			services.AddSingleton<MessageDispatcher>();
@@ -143,12 +121,33 @@ namespace Api
 			});
 		}
 
-		private string DecryptCypherText(string cypherText)
+		private static string DecryptCypherText(string cypherText)
 		{
+			const string encryptionKey = "123g2910a3qw34b1986rf9k8n63y3d1i";
+			var cipherBytes = Convert.FromBase64String(cypherText);
 
+			using (var encryptor = Aes.Create())
+			{
+				var pdb = new Rfc2898DeriveBytes(encryptionKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+				encryptor.Key = pdb.GetBytes(32);
+				encryptor.IV = pdb.GetBytes(16);
+
+				using (var memStream = new MemoryStream())
+				{
+					using (var cryptoStream = new CryptoStream(memStream, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+					{
+						cryptoStream.Write(cipherBytes, 0, cipherBytes.Length);
+						cryptoStream.Close();
+					}
+
+					cypherText = Encoding.Unicode.GetString(memStream.ToArray());
+				} // end using
+
+				pdb.Dispose();
+			} // end using
 
 			return cypherText;
-		}
+		} // end DecryptCypherText
 
 		private void OnShutDown()
 		{

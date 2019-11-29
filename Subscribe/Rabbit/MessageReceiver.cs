@@ -85,7 +85,7 @@ namespace Subscribe.Rabbit
 				{
 					_channel.BasicNack(envelope.DeliveryTag, false, false);
 				}
-			}
+			} // end if
 			else
 			{
 				_channel.BasicNack(envelope.DeliveryTag, false, false);

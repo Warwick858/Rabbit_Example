@@ -3,7 +3,10 @@
 ## Application Name: Rabbit_Example ##
 
 * Description: This solution is intended to be a simple, yet feature rich, example of how to
-publish and subscribe to a dynamic message broker exchange and queueing provider such as RabbitMQ.
+publish and subscribe to a dynamic message broker, exchange and queueing provider, such as RabbitMQ.
+
+* When this program is executed it inserts a message into an exchange and if picked up by the subscriber from the queue.
+The feedback to look for is on the rabbit UI.  You should see a blip on the queues message rate preview.
 
 ### Primary Features ###
 
@@ -58,16 +61,4 @@ http://localhost:15672/#/
 
 	* __Default Username:__ guest
 	* __Default Password:__ guest
-
------------------------------------------------------------------------------------------------
-
-### Project Comment Feed ###
-_General feed of thoughts and ideas as the project progressed. Begins with oldest comments_
-
-
-* AppSettings and RabbitConfig utilize static properties.  I'm under the impression that the dotnet "Core" way of doing this is to use dependency injection.  On the other hand, best programming practices dictate these classes be static, uninstantiated, and uninherited from.  So, when using dotnet core, should statics be DI'd instead, thus ignoring these established programming paradigms. The classic argument over who should drive, the framework or the user. ("I fight for the USER!!!" -Tron quote...ignore me, I'm a nerd.) Thoughts???
-* I did not extend all my classes with interfaces, so if you want to use core DI the _right_ way, and want to alleviate your testing efforts, extend all classes with interfaces by default.  Am I wrong here???
-* Made the instructions on the readme more comprehensive.  Makes sense.
-
-
 

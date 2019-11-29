@@ -35,7 +35,6 @@ namespace Subscribe.Rabbit
 	{
 		private BasicDeliverEventArgs Envelope { get; set; }
 		private IModel ReceivingChannel { get; set; }
-
 		public bool IsMessageRejected { get; set; }
 		public T Message { get; set; }
 		public string RejectReason { get; set; }
