@@ -39,6 +39,9 @@ using System.Reactive.Linq;
 
 namespace Subscribe.Rabbit
 {
+	/// <summary>
+	/// For multithreading subscribers
+	/// </summary>
 	public class MessageDispatcher : IDisposable
 	{
 		private readonly ChannelProvider _channelProvider;

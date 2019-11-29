@@ -30,6 +30,10 @@ using Common.Model;
 
 namespace Common
 {
+	/// <summary>
+	/// This is the class called after the subscriber has received a message.
+	/// Use this class to continue the flow and process the received message.
+	/// </summary>
 	public class MessageProcessor
 	{
 		public void ProcessMessage(BunnyModel msg)

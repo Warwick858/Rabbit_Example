@@ -34,6 +34,9 @@ using Subscribe.Rabbit;
 
 namespace Api
 {
+	/// <summary>
+	/// Class needed when running multithreaded subscribers as a console application.
+	/// </summary>
 	public class RabbitService : WebHostService
 	{
 		private readonly MessageDispatcher _dispatcher;

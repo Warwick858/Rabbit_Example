@@ -33,6 +33,9 @@ using System.Collections.Generic;
 
 namespace Subscribe.Rabbit
 {
+	/// <summary>
+	/// To create rabbit channels.
+	/// </summary>
 	public class ChannelProvider : IDisposable
 	{
 		private readonly IConnection _connection;

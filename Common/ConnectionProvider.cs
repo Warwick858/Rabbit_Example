@@ -32,6 +32,9 @@ using System;
 
 namespace Common
 {
+	/// <summary>
+	/// To provide the rabbit connection.
+	/// </summary>
 	public class ConnectionProvider
 	{
 		public static IConnection CreateConnection()

@@ -28,6 +28,9 @@
 //
 namespace Common.Model
 {
+	/// <summary>
+	/// The object that travels through rabbit.
+	/// </summary>
 	public class BunnyModel
 	{
 		public string Id { get; set; }
