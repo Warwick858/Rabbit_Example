@@ -5,8 +5,8 @@
 * Description: This solution is intended to be a simple, yet feature rich, example of how to
 publish and subscribe to a dynamic message broker, exchange and queueing provider, such as RabbitMQ.
 
-* When this program is executed it inserts a message into an exchange and if picked up by the subscriber from the queue.
-The feedback to look for is on the rabbit UI.  You should see a blip on the queues message rate preview.
+* When this program is executed it inserts a message into an exchange and is picked up by the subscriber from the queue.
+The feedback to look for is on the rabbit UI.  You should see a blip on the queues message rate preview if working correctly.
 
 ### Primary Features ###
 
