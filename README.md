@@ -2,6 +2,8 @@
 
 ## Application Name: Rabbit_Example ##
 
+* Solution Types: .NET Web Core
+
 * Description: This solution is intended to be a simple, yet feature rich, example of how to
 publish and subscribe to a dynamic message broker, exchange and queueing provider, such as RabbitMQ.
 
